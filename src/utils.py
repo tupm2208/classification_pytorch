@@ -16,8 +16,8 @@ def check_accuracy(loader, model, device="cuda"):
             x = x.to(device=device)
             y = y.to(device=device)
             scores = torch.sigmoid(model(x))
-            max_score = torch.max(scores, dim=1)[0]
-            predictions = (max_score>0.5).float()
+            max_score = torch.argmax(scores, dim=1)
+            predictions = max_score.float()
             num_correct += (predictions == y).sum()
             num_samples += predictions.shape[0]
 
