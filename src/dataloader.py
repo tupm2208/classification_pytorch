@@ -4,6 +4,7 @@ import os
 from torch.utils.data import Dataset
 from PIL import Image
 import numpy as np
+import cv2
 
 
 class DataFolder(Dataset):
@@ -27,7 +28,9 @@ class DataFolder(Dataset):
     def __getitem__(self, index):
         img_file, label = self.data[index]
         root_and_dir = os.path.join(self.root_dir, self.class_names[label])
-        image = np.array(Image.open(os.path.join(root_and_dir, img_file)).convert("RGB"))
+        # image = np.array(Image.open().convert("RGB"))
+        image = cv2.imread(os.path.join(root_and_dir, img_file))
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         if self.transform is not None:
             augmentations = self.transform(image=image)
             image = augmentations["image"]

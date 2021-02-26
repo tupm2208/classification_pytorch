@@ -44,7 +44,7 @@ def main(train_dir, val_dir, checkpoint_dir, batch_size, num_epochs=10, num_work
         load_checkpoint(torch.load("my_checkpoint.pth.tar"), model, optimizer)
 
     # make_prediction(model, config.val_transforms, 'test/', config.DEVICE)
-    check_accuracy(val_loader, model, config.DEVICE)
+    # check_accuracy(val_loader, model, config.DEVICE)
 
     for epoch in range(num_epochs):
         train_fn(train_loader, model, optimizer, loss_fn, scaler, config.DEVICE)
