@@ -28,7 +28,7 @@ def train_fn(loader, model, optimizer, loss_fn, scaler, device):
         scaler.update()
 
 
-def main(train_dir, val_dir, checkpoint_dir, batch_size, num_epochs=10, num_workers=2, pin_memory=True):
+def main(train_dir, val_dir, checkpoint_dir, batch_size, num_epochs=10, num_workers=1, pin_memory=True):
     global model
     train_ds = DataFolder(root_dir=train_dir, transform=config.train_transforms)
     val_ds = DataFolder(root_dir=val_dir, transform=config.val_transforms)
@@ -44,7 +44,7 @@ def main(train_dir, val_dir, checkpoint_dir, batch_size, num_epochs=10, num_work
         load_checkpoint(torch.load("my_checkpoint.pth.tar"), model, optimizer)
 
     # make_prediction(model, config.val_transforms, 'test/', config.DEVICE)
-    # check_accuracy(val_loader, model, config.DEVICE)
+    check_accuracy(val_loader, model, config.DEVICE)
 
     for epoch in range(num_epochs):
         train_fn(train_loader, model, optimizer, loss_fn, scaler, config.DEVICE)

@@ -27,10 +27,9 @@ class DataFolder(Dataset):
     def __getitem__(self, index):
         img_file, label = self.data[index]
         root_and_dir = os.path.join(self.root_dir, self.class_names[label])
-        image = np.array(Image.open(os.path.join(root_and_dir, img_file)))
+        image = np.array(Image.open(os.path.join(root_and_dir, img_file)).convert("RGB"))
         if self.transform is not None:
             augmentations = self.transform(image=image)
             image = augmentations["image"]
-
         return image, label
 

@@ -15,7 +15,6 @@ def check_accuracy(loader, model, device="cuda"):
         for x, y in loader:
             x = x.to(device=device)
             y = y.to(device=device)
-
             scores = torch.sigmoid(model(x))
             predictions = (scores>0.5).float()
             num_correct += (predictions == y).sum()
