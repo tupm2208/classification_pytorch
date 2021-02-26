@@ -11,7 +11,8 @@ import argparse
 
 
 def train_fn(loader, model, optimizer, loss_fn, scaler, device):
-    for batch_idx, (data, targets) in enumerate(tqdm(loader)):
+    tk0 = tqdm(loader)
+    for batch_idx, (data, targets) in enumerate(tk0):
         # Get data to cuda if possible
         data = data.to(device=device)
         targets = targets.to(device=device)
@@ -26,6 +27,8 @@ def train_fn(loader, model, optimizer, loss_fn, scaler, device):
         scaler.scale(loss).backward()
         scaler.step(optimizer)
         scaler.update()
+        tk0.set_postfix(loss=loss.item())
+
 
 
 def main(train_dir, val_dir, checkpoint_dir, batch_size, num_epochs=10, num_workers=1, pin_memory=True):
