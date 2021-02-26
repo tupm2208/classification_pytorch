@@ -12,7 +12,7 @@ def check_accuracy(loader, model, device="cuda"):
     model.eval()
 
     with torch.no_grad():
-        for x, y in loader:
+        for x, y in tqdm(loader):
             x = x.to(device=device)
             y = y.to(device=device)
             scores = torch.sigmoid(model(x))
