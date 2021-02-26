@@ -57,7 +57,7 @@ if __name__ == "__main__":
     parser.add_argument("--train_dir", default="../datasets/train", help="training directory")
     parser.add_argument("--val_dir", default="../datasets/val", help="validation directory")
     parser.add_argument("--checkpoint_dir", default="../checkpoints", help="checkpoint directory")
-    parser.add_argument("--batch_size", default=1, type=int)
+    parser.add_argument("--batch_size", default=2, type=int)
     parser.add_argument("--num_epochs", default=10, type=int)
     args = vars(parser.parse_args())
     main(**args)
