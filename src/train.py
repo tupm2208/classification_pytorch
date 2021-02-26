@@ -59,5 +59,6 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoint_dir", default="../checkpoints", help="checkpoint directory")
     parser.add_argument("--batch_size", default=2, type=int)
     parser.add_argument("--num_epochs", default=10, type=int)
+    parser.add_argument("--num_workers", default=2, type=int)
     args = vars(parser.parse_args())
     main(**args)
