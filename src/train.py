@@ -5,12 +5,13 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from model import MainModel
 from utils import check_accuracy, load_checkpoint, save_checkpoint, make_prediction
-import config
+from transforms import transform
 from dataloader import DataFolder
 import argparse
 import os
 from torch.utils.tensorboard import SummaryWriter
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 def train_fn(loader, model, optimizer, loss_fn, scaler, device, epoch, log_dir="logs"):
@@ -20,6 +21,7 @@ def train_fn(loader, model, optimizer, loss_fn, scaler, device, epoch, log_dir="
     running_losses = 0.0
 
     tk0 = tqdm(loader)
+    running_accuracy = 0.0
     for batch_idx, (data, targets) in enumerate(tk0):
         # Get data to cuda if possible
         data = data.to(device=device)
@@ -30,12 +32,18 @@ def train_fn(loader, model, optimizer, loss_fn, scaler, device, epoch, log_dir="
             scores = model(data)
             loss = loss_fn(scores.float(), targets)
 
+            max_score = torch.argmax(scores, dim=1)
+            predictions = max_score
+            num_correct = (predictions == targets).sum().to('cpu').numpy()
+        
+        running_accuracy += num_correct
+
         # backward
         optimizer.zero_grad()
         scaler.scale(loss).backward()
         scaler.step(optimizer)
         scaler.update()
-        tk0.set_postfix(loss=loss.item())
+        tk0.set_postfix(loss=loss.item(), accuracy=num_correct/loader.batch_size)
         
         running_losses += loss.item()
 
@@ -43,15 +51,22 @@ def train_fn(loader, model, optimizer, loss_fn, scaler, device, epoch, log_dir="
             writer.add_scalar('training loss',
                             running_losses / 30,
                             epoch * len(loader) + batch_idx)
-            running_losses = 0.0    
+            
+            writer.add_scalar('training accuracy',
+                            running_accuracy / (30*loader.batch_size),
+                            epoch * len(loader) + batch_idx)
+            running_losses = 0.0
+            running_accuracy = 0.0 
 
 
-
-def main(train_dir, val_dir, checkpoint_dir, batch_size, checkpoint_name, num_epochs=10, num_workers=1, pin_memory=True, log_dir="logs"):
+def main(
+    train_dir,val_dir, checkpoint_dir,
+    batch_size, image_size=512, num_epochs=10, checkpoint_name=None, 
+    num_workers=1, pin_memory=True, log_dir="logs"):
     
     # declare datasets
-    train_ds = DataFolder(root_dir=train_dir, transform=config.train_transforms)
-    val_ds = DataFolder(root_dir=val_dir, transform=config.val_transforms)
+    train_ds = DataFolder(root_dir=train_dir, transform=transform(image_size, is_training=True))
+    val_ds = DataFolder(root_dir=val_dir, transform=transform(image_size, is_training=False))
     train_loader = DataLoader(train_ds, batch_size=batch_size, num_workers=num_workers,pin_memory=pin_memory, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=batch_size, num_workers=num_workers,pin_memory=pin_memory,shuffle=True)
 
@@ -60,21 +75,20 @@ def main(train_dir, val_dir, checkpoint_dir, batch_size, checkpoint_name, num_ep
 
     # configure parameter
     loss_fn = nn.CrossEntropyLoss()
-    model = model.to(config.DEVICE)
-    optimizer = optim.Adam(model.parameters(), lr=config.LEARNING_RATE)
+    model = model.to(device)
+    optimizer = optim.Adam(model.parameters(), lr=1e-4)
     scaler = torch.cuda.amp.GradScaler()
 
     if checkpoint_name:
         ckp_path = os.path.join(checkpoint_dir, checkpoint_name)
         load_checkpoint(torch.load(ckp_path), model, optimizer)
 
-    # make_prediction(model, config.val_transforms, 'test/', config.DEVICE)
-    # check_accuracy(train_loader, model, config.DEVICE)
+    # check_accuracy(train_loader, model, device)
 
     #training
     for epoch in range(num_epochs):
-        train_fn(train_loader, model, optimizer, loss_fn, scaler, config.DEVICE, epoch, log_dir=log_dir)
-        check_accuracy(val_loader, model, config.DEVICE)
+        train_fn(train_loader, model, optimizer, loss_fn, scaler, device, epoch, log_dir=log_dir)
+        check_accuracy(val_loader, model, device)
         checkpoint = {'state_dict': model.state_dict(), 'optimizer': optimizer.state_dict()}
         save_checkpoint(checkpoint, os.path.join(checkpoint_dir, f"checkpoint_{epoch}.pth.tar"))
 
@@ -88,5 +102,6 @@ if __name__ == "__main__":
     parser.add_argument("--num_workers", default=2, type=int)
     parser.add_argument("--checkpoint_name", default=None, type=str)
     parser.add_argument("--log_dir", default="../logs", type=str)
+    parser.add_argument("--image_size", default=512, type=int)
     args = vars(parser.parse_args())
     main(**args)

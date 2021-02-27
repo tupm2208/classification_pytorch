@@ -33,10 +33,11 @@ def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
     torch.save(state, filename)
 
 
-def load_checkpoint(checkpoint, model, optimizer):
+def load_checkpoint(checkpoint, model, optimizer=None):
     print("=> Loading checkpoint")
     model.load_state_dict(checkpoint['state_dict'])
-    optimizer.load_state_dict(checkpoint['optimizer'])
+    if optimizer is not None:
+        optimizer.load_state_dict(checkpoint['optimizer'])
 
 def make_prediction(model, transform, rootdir, device):
     files = os.listdir(rootdir)
