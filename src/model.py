@@ -1,9 +1,11 @@
-import torch
+from models.efficientNet import EfficientNet
 from torch import nn
 
+class MainModel(nn.Module):
+    def __init__(self, num_classes, model_name):
+        super(MainModel, self).__init__()
 
-from efficientnet_pytorch import EfficientNet
+        self.model = EfficientNet(num_classes, model_name)
 
-model = EfficientNet.from_pretrained("efficientnet-b3")
-
-model._fc = nn.Linear(in_features=1536, out_features=13, bias=True)
+    def forward(self, x):
+        return self.model(x)

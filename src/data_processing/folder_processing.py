@@ -2,6 +2,7 @@ import os
 import numpy as np
 import shutil
 from tqdm import tqdm
+import cv2
 
 
 def copy(source, des, folder, image_list, dtype='train'):
@@ -22,6 +23,20 @@ def split_train_test(source, des, p=0.7):
         copy(source, des, folder, image_list[:num_train], dtype='train')
         copy(source, des, folder, image_list[num_train:], dtype='val')
 
+
+def remove_error_file(source):
+    folders = os.listdir(source)
+
+    for folder in tqdm(folders):
+        image_list = [os.path.join(source, folder, e) for e in os.listdir(os.path.join(source, folder))]
+
+        for src in image_list:
+            img = cv2.imread(src)
+
+            if img is None:
+                os.remove(src)
+
 if __name__ == "__main__":
-    split_train_test("/home/tupm/datasets/complete_data", "/home/tupm/projects/classification_pytorch/datasets")
+    split_train_test("/home/tupm/SSD/CAT_datasets/download", "/home/tupm/SSD/CAT_datasets/datasets", p=0.1)
+    # remove_error_file("/home/tupm/SSD/CAT_datasets/download")
         

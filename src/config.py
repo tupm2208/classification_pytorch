@@ -7,7 +7,7 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 NUM_WORKERS = 4
 BATCH_SIZE = 1
 PIN_MEMORY = True
-LOAD_MODEL = False
+LOAD_MODEL = True
 LEARNING_RATE = 1e-4
 NUM_EPOCHS = 100
 SIZE = 416
@@ -15,6 +15,8 @@ SIZE = 416
 train_transforms = A.Compose([
     A.Resize(width=SIZE, height=SIZE,),
     # A.RandomCrop(width=SIZE, height=SIZE),
+    A.RandomContrast(limit=0.2, p=0.4),
+    A.ColorJitter(),
     A.Rotate(40),
     A.HorizontalFlip(p=0.5),
     A.VerticalFlip(p=0.1),

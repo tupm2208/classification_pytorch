@@ -10,9 +10,10 @@ def check_accuracy(loader, model, device="cuda"):
     num_correct = 0
     num_samples = 0
     model.eval()
+    tk0 = tqdm(loader)
 
     with torch.no_grad():
-        for x, y in tqdm(loader):
+        for x, y in tk0:
             x = x.to(device=device)
             y = y.to(device=device)
             scores = torch.sigmoid(model(x))
@@ -20,6 +21,7 @@ def check_accuracy(loader, model, device="cuda"):
             predictions = max_score.float()
             num_correct += (predictions == y).sum()
             num_samples += predictions.shape[0]
+            tk0.set_postfix(accuracy=f'{float(num_correct) / float(num_samples) * 100:.2f}')
 
         print(f'Got {num_correct} / {num_samples} with accuracy {float(num_correct) / float(num_samples) * 100:.2f}')
 

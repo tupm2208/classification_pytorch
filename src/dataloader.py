@@ -19,6 +19,8 @@ class DataFolder(Dataset):
             files = os.listdir(os.path.join(root_dir, name))
             self.data += list(zip(files, [index]*len(files)))
 
+        print(self.root_dir, self.__len__())
+
     def __len__(self):
         return len(self.data)
 
@@ -30,6 +32,7 @@ class DataFolder(Dataset):
         root_and_dir = os.path.join(self.root_dir, self.class_names[label])
         # image = np.array(Image.open().convert("RGB"))
         image = cv2.imread(os.path.join(root_and_dir, img_file))
+        # print(os.path.join(root_and_dir, img_file))
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         if self.transform is not None:
             augmentations = self.transform(image=image)
