@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from model import MainModel
 from utils import check_accuracy, load_checkpoint, save_checkpoint, make_prediction
-import config
+from transforms import transform
 from dataloader import DataFolder
 import argparse
 import os
@@ -18,16 +18,16 @@ parser.add_argument("--batch_size", default=2, type=int)
 parser.add_argument("--num_workers", default=2, type=int)
 parser.add_argument("--checkpoint_path", default=None, type=str)
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 def main(test_dir, checkpoint_path, batch_size, num_workers=1, pin_memory=True):
     
     # declare datasets
-    test_ds = DataFolder(root_dir=test_dir, transform=config.val_transforms, is_test=True)
+    test_ds = DataFolder(root_dir=test_dir, transform=transform(is_training=False), is_test=True)
     test_loader = DataLoader(test_ds, batch_size=batch_size, num_workers=num_workers,pin_memory=pin_memory,shuffle=True)
     
-    device = config.DEVICE
     #init model
-    model = MainModel(test_ds.__num_class__(), 'efficientnet-b3')
+    model = MainModel(test_ds.__num_class__(), 'efficientnet-b1')
     model = model.to(device)
 
     # load checkpoint

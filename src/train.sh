@@ -3,6 +3,6 @@ python train.py \
             --val_dir /home/tupm/SSD/CAT_datasets/datasets/val \
             --num_workers 8 \
             --num_epochs 30 \
-            --batch_size 12 \
+            --batch_size 32 \
             --checkpoint_name '' \
-            --image_size 512
+            --image_size 256

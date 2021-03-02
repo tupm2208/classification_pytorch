@@ -20,7 +20,10 @@ class DataFolder(Dataset):
             files = os.listdir(os.path.join(root_dir, name))
             self.data += list(zip(files, [index]*len(files)))
 
-        print(self.root_dir, self.__len__())
+        print(self.root_dir)
+        print("number of data:", self.__len__())
+        print("number of classes:", self.__num_class__())
+        print()
 
     def __len__(self):
         return len(self.data)
