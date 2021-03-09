@@ -5,4 +5,5 @@ python train.py \
             --num_epochs 30 \
             --batch_size 32 \
             --checkpoint_name '' \
-            --image_size 256
+            --image_size 256 \
+            --model_name efficientnet-b3

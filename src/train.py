@@ -62,22 +62,25 @@ def train_fn(loader, model, optimizer, loss_fn, scaler, device, epoch, log_dir="
 def main(
     train_dir,val_dir, checkpoint_dir,
     batch_size, image_size=512, num_epochs=10, checkpoint_name=None, 
-    num_workers=1, pin_memory=True, log_dir="logs"):
+    num_workers=1, pin_memory=True, log_dir="logs", model_name=None):
     
     # declare datasets
-    train_ds = DataFolder(root_dir=train_dir, transform=transform(image_size, is_training=True))
-    val_ds = DataFolder(root_dir=val_dir, transform=transform(image_size, is_training=False))
-    train_loader = DataLoader(train_ds, batch_size=batch_size, num_workers=num_workers,pin_memory=pin_memory, shuffle=True)
-    val_loader = DataLoader(val_ds, batch_size=batch_size, num_workers=num_workers,pin_memory=pin_memory,shuffle=True)
+    # train_ds = DataFolder(root_dir=train_dir, transform=transform(image_size, is_training=True))
+    # val_ds = DataFolder(root_dir=val_dir, transform=transform(image_size, is_training=False))
+    # train_loader = DataLoader(train_ds, batch_size=batch_size, num_workers=num_workers,pin_memory=pin_memory, shuffle=True)
+    # val_loader = DataLoader(val_ds, batch_size=batch_size, num_workers=num_workers,pin_memory=pin_memory,shuffle=True)
 
     #init model
-    model = MainModel(train_ds.__num_class__(), 'efficientnet-b3')
+    model = MainModel(128, model_name)
 
     # configure parameter
     loss_fn = nn.CrossEntropyLoss()
     model = model.to(device)
     optimizer = optim.Adam(model.parameters(), lr=1e-4)
     scaler = torch.cuda.amp.GradScaler()
+    checkpoint = {'state_dict': model.state_dict(), 'optimizer': optimizer.state_dict()}
+    save_checkpoint(checkpoint, os.path.join(checkpoint_dir, f"checkpoint_initialilze.pth.tar"))
+    return
 
     if checkpoint_name:
         ckp_path = os.path.join(checkpoint_dir, checkpoint_name)
@@ -102,6 +105,7 @@ if __name__ == "__main__":
     parser.add_argument("--num_workers", default=2, type=int)
     parser.add_argument("--checkpoint_name", default=None, type=str)
     parser.add_argument("--log_dir", default="../logs", type=str)
+    parser.add_argument("--model_name", default="../logs", type=str)
     parser.add_argument("--image_size", default=512, type=int)
     args = vars(parser.parse_args())
     main(**args)
