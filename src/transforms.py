@@ -3,7 +3,7 @@ import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
 
-def transform(image_size=512, is_training=True):
+def transform(image_size=256, is_training=True):
     
     if is_training:
         return  A.Compose([

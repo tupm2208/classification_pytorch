@@ -8,7 +8,7 @@ import numpy as np
 
 
 def check_image(df):
-    root_dir = "/home/tupm/datasets/CAT_classification/smartcare/topics_v3"
+    root_dir = "/home/tupm/SSD/CAT_datasets/workspace/smartcare/topics_v3"
     idxs = []
     for i in tqdm(range(df.shape[0])):
         img_file, label_name, label = df.iloc[i].values
@@ -16,10 +16,7 @@ def check_image(df):
         image = cv2.imread(img_path)
 
         if image is None:
-            splited = img_path.split("/")
-            img_path = f"/{splited[1]}/download/{splited[-2]}/{splited[-1]}"
-            image = cv2.imread(img_path)
-        if image is None:
+            print(img_path)
             idxs.append(i)
     return df.loc[~df.index.isin(idxs)], df.loc[df.index.isin(idxs)]
 
@@ -41,5 +38,7 @@ def check_file(input_file, output_file, n_cores=8):
     pool.close()
     pool.join()
     
-    new_df.to_csv(output_file, index=False, header=False)
+    new_df.to_csv(output_file, index=False)
 
+if __name__ == '__main__':
+    check_file("../datasets/test_fix_1.csv", "../datasets/test_fix_2.csv", 12)    

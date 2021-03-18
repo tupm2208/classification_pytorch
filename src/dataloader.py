@@ -5,20 +5,20 @@ from torch.utils.data import Dataset
 from PIL import Image
 import numpy as np
 import cv2
+import pandas as pd
 
 
 class DataFolder(Dataset):
-    def __init__(self, root_dir, transform=None, is_test=False):
+    def __init__(self, root_dir, transform=None, is_test=False, csv_path=None):
         super(DataFolder, self).__init__()
         self.data = []
         self.root_dir = root_dir
         self.transform = transform
-        self.class_names = os.listdir(root_dir)
+        
         self.is_test = is_test
 
-        for index, name in enumerate(self.class_names):
-            files = os.listdir(os.path.join(root_dir, name))
-            self.data += list(zip(files, [index]*len(files)))
+        self.df = pd.read_csv(csv_path)
+        self.class_names = self.df['class_name'].unique().tolist()
 
         print(self.root_dir)
         print("number of data:", self.__len__())
@@ -26,18 +26,19 @@ class DataFolder(Dataset):
         print()
 
     def __len__(self):
-        return len(self.data)
+        # return len(self.data)
+        return self.df.shape[0]
 
     def __num_class__(self):
         return len(self.class_names)
 
     def __getitem__(self, index):
-        img_file, label = self.data[index]
-        root_and_dir = os.path.join(self.root_dir, self.class_names[label])
-        img_path = os.path.join(root_and_dir, img_file)
+        img_file, classname, label = self.df.iloc[index]
+        img_path = os.path.join(self.root_dir, img_file)
         image = cv2.imread(img_path)
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        
+        # image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        if image is None:
+            print(img_path)
         if self.transform is not None:
             augmentations = self.transform(image=image)
             image = augmentations["image"]

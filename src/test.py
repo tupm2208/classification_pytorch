@@ -17,17 +17,19 @@ parser.add_argument("--test_dir", default="../datasets/train", help="test direct
 parser.add_argument("--batch_size", default=2, type=int)
 parser.add_argument("--num_workers", default=2, type=int)
 parser.add_argument("--checkpoint_path", default=None, type=str)
+parser.add_argument("--test_csv", default=None, type=str)
+parser.add_argument("--model_name", default=None, type=str)
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-def main(test_dir, checkpoint_path, batch_size, num_workers=1, pin_memory=True):
+def main(test_dir, checkpoint_path, batch_size, num_workers=1, pin_memory=True, test_csv=None, model_name='efficientnet-b3'):
     
     # declare datasets
-    test_ds = DataFolder(root_dir=test_dir, transform=transform(is_training=False), is_test=True)
+    test_ds = DataFolder(root_dir=test_dir, transform=transform(is_training=False), is_test=True, csv_path=test_csv)
     test_loader = DataLoader(test_ds, batch_size=batch_size, num_workers=num_workers,pin_memory=pin_memory,shuffle=True)
     
     #init model
-    model = MainModel(test_ds.__num_class__(), 'efficientnet-b1')
+    model = MainModel(test_ds.__num_class__(), model_name)
     model = model.to(device)
 
     # load checkpoint
